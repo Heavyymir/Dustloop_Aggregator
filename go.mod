@@ -1,16 +1,23 @@
-module github.com/Heavyymir/CharData_Aggregator
+module github.com/Heavyymir/Dustloop_Aggregator
 
 go 1.26.3
 
 require (
 	github.com/PuerkitoBio/goquery v1.12.0
+	github.com/chromedp/chromedp v0.16.0
 	github.com/chzyer/readline v1.5.1
 	modernc.org/sqlite v1.57.0
 )
 
 require (
 	github.com/andybalholm/cascadia v1.3.3 // indirect
+	github.com/chromedp/cdproto v0.0.0-20260804232424-e85f50dbfd32 // indirect
+	github.com/chromedp/sysutil v1.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3 // indirect
+	github.com/gobwas/httphead v0.1.0 // indirect
+	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect

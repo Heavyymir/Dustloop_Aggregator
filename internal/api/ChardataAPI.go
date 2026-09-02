@@ -5,6 +5,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"context"
+	"strings"
+	"time"
+	//"os"
+	//"path/filepath"
+
+	"github.com/chromedp/chromedp"
 )
 
 // Get request to scrape for HTML data from wikis. Needs inputs to be updated to be selctable later.
@@ -64,4 +71,83 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+
+// FetchHTMLHeadless launches a headless browser instance with the url, waits for cloudflare/js to settle
+// and extracts the full outer HTML for parsing.
+func (c *Client) FetchHTMLHeadless(url string, timeout time.Duration) ([]byte, error) {
+	// Check cache to avoid slow browser launches
+	if data, ok := c.Cache.Get(url); ok && len(data) > 0 {
+		return data, nil
+	}
+	// Configure chrome options for the instance
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		// "Headless" is the flag that hides the UI for the Chromium instance in the function
+		chromedp.Flag("headless", false),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("disable-blink-features", "AutomationControlled"),
+		chromedp.Flag("enable-automation", false),
+		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+	)
+
+	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancelAlloc()
+
+	// Create the chromedp context
+	ctx, cancelCtx := chromedp.NewContext(allocCtx)
+	defer cancelCtx()
+
+	// Set the timeout context to prevent requests hanging
+	ctx, cancelTimeout := context.WithTimeout(ctx, timeout)
+	defer cancelTimeout()
+
+	var htmlContent string
+
+	// Run browser automation tasks
+	err := chromedp.Run(ctx,
+		// Navigate to target URL
+		chromedp.Navigate(url),
+
+		// Poll/Sleep until Cloudflare passes and the title changes
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			for i := 0; i < 15; i++ {
+				var currentTitle string
+				if err := chromedp.Title(&currentTitle).Do(ctx); err == nil {
+					if currentTitle != "" && currentTitle != "Just a moment..." {
+						return nil
+					}
+				}
+				time.Sleep(1 * time.Second)
+			}
+			return nil
+		}),
+	
+		// Give dynamic scripts 1 extra second to render tables
+		chromedp.Sleep(1 * time.Second),
+	
+		// Capture full rendered HTML
+		chromedp.OuterHTML("html", &htmlContent),
+		)
+
+	if err != nil {
+		return nil, fmt.Errorf("chromedp exectution failed for %s: %w", url, err)
+	}
+
+
+	// 5. Verify request didn't capture the challenge page
+	if strings.Contains(htmlContent, "<title>Just a moment...</title>") {
+		return nil, fmt.Errorf("cloudflare challenge was not passed for %s", url)
+	}
+
+	data := []byte(htmlContent)
+	if len(data) == 0 {
+		return nil, fmt.Errorf("empty html returned from headless session for %s", url)
+	}
+
+	// Cache the fetched html
+	c.Cache.Add(url, data)
+
+	return data, nil	
 }

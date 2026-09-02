@@ -5,12 +5,11 @@ import (
 	"strings"
 
 	"github.com/Heavyymir/CharData_Aggregator/config"
-
 	"github.com/Heavyymir/CharData_Aggregator/internal/models"
 	"github.com/Heavyymir/CharData_Aggregator/internal/storage/sqlite"
 	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/bbcf"
 	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/ggst"
-	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/sf6"
+	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/fat"
 	//"github.com/Heavyymir/CharData_Aggregator/internal/parsers/sf3s"
 )
 
@@ -33,10 +32,9 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	pagePath := strings.Replace(cfg.Game.CharacterPath, "{character}", characterName, 1)
 	requestURL := fmt.Sprintf("%s/%s", strings.TrimRight(cfg.Wiki.URL, "/"), pagePath)
 
-	// Get the URL for Parsing
 	data, err := cfg.CharDataClient.Fetch(requestURL)
 	if err != nil {
-		return fmt.Errorf("fetch page: %w", err)
+		return fmt.Errorf("fetch %s: %w", requestURL, err)
 	}
 	
 	var moves []models.Move
@@ -54,8 +52,8 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			return err
 		}
 
-	case "sf6":
-		moves, err = sf6.SF6CharPageParser(data)
+	case "sf6", "sf5", "usf4":
+		moves, err = fat.FATJSONParser(data)
 		if err != nil {
 			return err
 		}
@@ -87,7 +85,6 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			rowCount += len(grid.Rows)
 		}
 	
-		fmt.Printf("before save: %s rows=%d\n", move.Name, rowCount)
 	
 		for gridIndex, grid := range move.FrameDataGrids {
 			for rowIndex, row := range grid.Rows {
@@ -100,7 +97,7 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			}
 		}
 	}
-
+    
 	if err := sqlite.SaveMoves(cfg.DB, characterID, moves); err != nil {
 		return err
 	}
