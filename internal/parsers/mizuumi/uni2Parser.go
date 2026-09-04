@@ -107,10 +107,28 @@ func Uni2CharDataParser(data []byte) ([]models.Move, error) {
 			// Clone and remove <ul> elements to get description text
 			descClone := descNode.Clone()
 			descClone.Find("ul").Remove()
-			descClone.Find(".mw-headline, h6, h5").Remove()
-			cleanDesc := strings.TrimSpace(descClone.Text())
-			if cleanDesc != "" {
-				descriptions = append(descriptions, cleanDesc)
+			descClone.Find(".mw-headline, h6, h5, b, strong").Each(func(_ int, label *goquery.Selection) {
+				// If the element is just a move label (eg. "2a :" or "5[C] :")	strip it
+				txt := strings.TrimSpace(label.Text())
+				if strings.HasSuffix(txt, ":") || txt == move.Input || txt == move.Name {
+					label.Remove()
+				}
+			})
+			
+			// Clean and filter individual lines of the description text
+			rawText := descClone.Text()
+			var cleanLines []string
+			for _, line := range strings.Split(rawText, "\n") {
+				trimmed := strings.TrimSpace(line)
+				// Filter out empty lines or orphan labels like "2A :" or "2A"
+				if trimmed == "" || strings.HasSuffix(trimmed, ":") || trimmed == move.Input {
+					continue
+				}
+				cleanLines = append(cleanLines, trimmed)
+			}
+		
+			if len(cleanLines) > 0 {
+				descriptions = append(descriptions, strings.Join(cleanLines, "\n"))
 			}
 		})
 

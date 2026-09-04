@@ -39,8 +39,8 @@ func SaveCharacter(db *sql.DB, gameSlug string, character models.Character) (int
 		SELECT id FROM characters
 		WHERE game = ? AND slug = ?
 		`,
-		gameSlug,
-		character.Slug,
+		normGame,
+		normSlug,
 		).Scan(&id)
 		
 	if err != nil {

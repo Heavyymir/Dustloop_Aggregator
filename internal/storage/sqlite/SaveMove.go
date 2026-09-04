@@ -32,7 +32,7 @@ func SaveMoves(db *sql.DB, characterID int64, moves []models.Move) error {
 	// Delete existing moves for this character
 	_, err = tx.Exec(`
 		DELETE FROM moves
-		WHERE chracter_id = ?
+		WHERE character_id = ?
 		`, characterID)
 	if err != nil {
 		return fmt.Errorf("clear existing moves: %w", err)

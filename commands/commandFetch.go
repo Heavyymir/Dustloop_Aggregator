@@ -32,17 +32,24 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	characterInput := args[0]
 	targetSlug := characterInput
 
-	// 1. Try to load the discovered characters cache for this game
-	filename := cfg.Game.Slug + "_characters.json"
+	// Try loading discovered characters to get the exact casing from saved <wiki>_characters.json
+	filename := strings.ToLower(cfg.Game.Slug) + "_characters.json"
 	cache, err := discovery.LoadCharCache(filename)
 	if err == nil {
-    	// 2. Look for a case-insensitive match (e.g. "hyde" matches "Hyde", "RYU" matches "ryu")
-    	for _, char := range cache.Characters {
-        	if strings.EqualFold(char.Name, characterInput) || strings.EqualFold(char.Slug, characterInput) {
-            	targetSlug = char.Slug
-            	break
-        	}
-    	}
+		for _, char := range cache.Characters {
+			if strings.EqualFold(char.Name, characterInput) || strings.EqualFold(char.Slug, characterInput) {
+				targetSlug = char.Slug
+				break
+			}
+		}
+	}
+	
+	// Fallback if cache wasn't found: Capitalize first letter for MediaWiki
+	if targetSlug == characterInput && len(characterInput) > 0 {
+		switch strings.ToLower(cfg.Wiki.Slug) {
+		case "mizuumi", "supercombo", "dustloop":
+			targetSlug = strings.ToUpper(characterInput[:1]) + characterInput[1:]
+		}
 	}
 
 	// 3. Build the URL using the matched slug

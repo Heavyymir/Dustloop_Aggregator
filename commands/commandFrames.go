@@ -58,34 +58,38 @@ func commandFrames(cfg *config.Config, args ...string) error {
 
 	// Print logic for SQL framedata grids
 	for _, move := range moves {
-		fmt.Printf("=== %s (%s) ===\n", move.Name, move.Input)
-		
-		for i, grid := range move.FrameDataGrids {
-			if i == 0 {
-				fmt.Println("[Base Frame Data]")
-			} else {
-				fmt.Printf("[Additional Data - Grid %d]\n", i)
-			}
-			printGrid(grid)
-			fmt.Println()
-		}
+			// 1. Always print the move header
+			fmt.Printf("=== %s (%s) ===\n", move.Name, move.Input)
 			
-		if len(move.Notes) > 0 {
-			fmt.Println("Notes:")
-			for _, note := range move.Notes {
-				fmt.Printf("  • %s\n", note)
+			// 2. Always print the frame data grids
+			for i, grid := range move.FrameDataGrids {
+				if i == 0 {
+					fmt.Println("[Base Frame Data]")
+				} else {
+					fmt.Printf("[Additional Data - Grid %d]\n", i)
+				}
+				printGrid(grid)
+				fmt.Println()
 			}
-			fmt.Println()
+				
+			// 3. Always print notes if they exist
+			if len(move.Notes) > 0 {
+				fmt.Println("Notes:")
+				for _, note := range move.Notes {
+					fmt.Printf("  • %s\n", note)
+				}
+				fmt.Println()
+			}
+	
+			// 4. ONLY print description when flag is enabled AND description exists
+			if showDetails && move.Description != "" {
+				fmt.Println("Description:")
+				fmt.Println(move.Description)
+				fmt.Println()
+			}
+	
+			fmt.Println(strings.Repeat("=", 60))
 		}
-
-		if showDetails && move.Description != "" {
-			fmt.Println("Description:")
-			fmt.Println(move.Description)
-			fmt.Println()
-		}
-
-		fmt.Println(strings.Repeat("=", 60))
-	}
 
 	return nil
 	

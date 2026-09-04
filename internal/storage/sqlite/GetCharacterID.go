@@ -13,7 +13,7 @@ func GetCharacterID(db *sql.DB, game, slug string) (int64, error) {
 	err := db.QueryRow(`
 		SELECT id
 		FROM characters
-		WHERE game = ? AND slug = ?
+		WHERE LOWER(game) = LOWER(?) AND LOWER(slug) = LOWER(?)
 		`,
 		game,
 		slug,

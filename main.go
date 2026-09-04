@@ -1,10 +1,11 @@
 package main
 
-import(
+import (
 	"log"
-	
+
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
+
 func main() {
 	// Call to open local sqlite DB to hold data
 	db, err := sqlite.Open("chardata.db")

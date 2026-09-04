@@ -12,7 +12,7 @@ func GetMoves(db *sql.DB, characterID int64) ([]models.Move, error) {
 	
 	// Query Data base, save to rows
 	rows, err := db.Query(`
-		SELECT id, input, name
+		SELECT id, input, name, COALESCE(description, '')
 		FROM moves
 		WHERE character_id = ?
 		ORDER BY id

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
 	"github.com/Heavyymir/Dustloop_Aggregator/commands"
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
@@ -15,7 +15,7 @@ import (
 func startRepl(db *sql.DB) {
 	cfg := config.Config{
 		CharDataClient: api.NewClient(),
-		DB:				db,
+		DB:             db,
 	}
 
 	// Initialise the completer to handle tab completion of internal commands
@@ -73,7 +73,6 @@ func startRepl(db *sql.DB) {
 	}
 }
 
-
 // Cleans user inputs
 func cleanInput(text string) []string {
 	lowerCase := strings.ToLower(text)
@@ -105,7 +104,6 @@ func wikiCompleter() []readline.PrefixCompleterInterface {
 			children...,
 		))
 	}
-	// return the completed select command tree 
+	// return the completed select command tree
 	return items
 }
-
