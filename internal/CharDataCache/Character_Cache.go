@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 type CharacterCache struct {

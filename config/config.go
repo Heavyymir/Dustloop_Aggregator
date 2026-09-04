@@ -2,8 +2,8 @@ package config
 
 import (
 	"database/sql"
-	"github.com/Heavyymir/CharData_Aggregator/catalog"
-	"github.com/Heavyymir/CharData_Aggregator/internal/api"
+	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/api"
 	
 )
 

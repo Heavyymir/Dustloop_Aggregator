@@ -7,7 +7,7 @@ import(
 	"net/http"
 	"net/url"
 
-	"github.com/Heavyymir/CharData_Aggregator/catalog"
+	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
 )
 
 

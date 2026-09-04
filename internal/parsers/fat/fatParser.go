@@ -5,7 +5,7 @@ import(
 	"fmt"
 	"strings"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 // FATJSONParser takes the raw JSON bytes from FAT and transforms it into models.Move slices

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 func BBCFCharPageParser(data []byte) ([]models.Move, error) {

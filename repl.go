@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"database/sql"
-	"github.com/Heavyymir/CharData_Aggregator/catalog"
-	"github.com/Heavyymir/CharData_Aggregator/commands"
-	"github.com/Heavyymir/CharData_Aggregator/config"
-	"github.com/Heavyymir/CharData_Aggregator/internal/api"
+	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
+	"github.com/Heavyymir/Dustloop_Aggregator/commands"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/api"
 	"github.com/chzyer/readline"
 	"strings"
 )
@@ -26,9 +26,11 @@ func startRepl(db *sql.DB) {
 		readline.PcItem("exit"),
 		readline.PcItem("discover"),
 		readline.PcItem("frames"),
+		readline.PcItem("list"),
 	)
 
 	// Start the REPL
+	fmt.Println("Welcome to the Character Data Aggregator. Please type 'help' for a list of commands.")
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:       "CharData > ",
 		AutoComplete: completer,

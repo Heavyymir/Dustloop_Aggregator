@@ -3,8 +3,8 @@ package commands
 import(
 	"fmt"
 
-	"github.com/Heavyymir/CharData_Aggregator/config"
-	"github.com/Heavyymir/CharData_Aggregator/internal/storage/sqlite"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
 
 // Command to list all character entries in the DB based on a selected game

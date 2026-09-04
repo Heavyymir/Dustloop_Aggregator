@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS moves (
     character_id INTEGER NOT NULL,
     input TEXT,
     name TEXT NOT NULL,
+    description TEXT,
     FOREIGN KEY (character_id) REFERENCES characters(id)
 );
 

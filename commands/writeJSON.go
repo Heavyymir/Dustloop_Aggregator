@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 // The below helper is designed to create a Json output for the program to store outputs

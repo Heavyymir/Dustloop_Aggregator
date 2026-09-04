@@ -1,6 +1,6 @@
 package commands
 
-import "github.com/Heavyymir/CharData_Aggregator/config"
+import "github.com/Heavyymir/Dustloop_Aggregator/config"
 
 type CliCommand struct {
 	Name        string

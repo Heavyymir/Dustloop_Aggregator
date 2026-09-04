@@ -3,13 +3,17 @@ package commands
 import (
 	"fmt"
 	"strings"
+	"time"
+	"os"
 
-	"github.com/Heavyymir/CharData_Aggregator/config"
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
-	"github.com/Heavyymir/CharData_Aggregator/internal/storage/sqlite"
-	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/bbcf"
-	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/ggst"
-	"github.com/Heavyymir/CharData_Aggregator/internal/parsers/fat"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/bbcf"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/ggst"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/fat"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/mizuumi"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/discovery"
 	//"github.com/Heavyymir/CharData_Aggregator/internal/parsers/sf3s"
 )
 
@@ -25,21 +29,53 @@ func commandFetch(cfg *config.Config, args ...string) error {
 		return fmt.Errorf("usage: fetch <character>")
 	}
 
-	characterName := args[0]
-	characterSlug := strings.ToLower(strings.ReplaceAll(characterName, " ", "_"))
-	
-	// Format page title from catalog URL patterns using characterName   
-	pagePath := strings.Replace(cfg.Game.CharacterPath, "{character}", characterName, 1)
+	characterInput := args[0]
+	targetSlug := characterInput
+
+	// 1. Try to load the discovered characters cache for this game
+	filename := cfg.Game.Slug + "_characters.json"
+	cache, err := discovery.LoadCharCache(filename)
+	if err == nil {
+    	// 2. Look for a case-insensitive match (e.g. "hyde" matches "Hyde", "RYU" matches "ryu")
+    	for _, char := range cache.Characters {
+        	if strings.EqualFold(char.Name, characterInput) || strings.EqualFold(char.Slug, characterInput) {
+            	targetSlug = char.Slug
+            	break
+        	}
+    	}
+	}
+
+	// 3. Build the URL using the matched slug
+	pagePath := strings.Replace(cfg.Game.CharacterPath, "{character}", targetSlug, 1)
 	requestURL := fmt.Sprintf("%s/%s", strings.TrimRight(cfg.Wiki.URL, "/"), pagePath)
 
-	data, err := cfg.CharDataClient.Fetch(requestURL)
+	var data []byte
+	
+	switch cfg.Wiki.Slug {
+	case "mizuumi", "supercombo":
+    	// Uses chromedp to wait out Cloudflare / Anubis PoW
+    	fmt.Println("Using headless fetch method for character page, please wait a moment while challenges are passed")
+   		data, err = cfg.CharDataClient.FetchHTMLHeadless(requestURL, 30 * time.Second)
+	default:
+   		// Fast standard HTTP for Dustloop, FAT JSON, etc.
+   		data, err = cfg.CharDataClient.Fetch(requestURL)
+	}
+
 	if err != nil {
-		return fmt.Errorf("fetch %s: %w", requestURL, err)
+    	return fmt.Errorf("fetch %s: %w", requestURL, err)
+	}
+
+	// 1. Log the fetched size and URL
+	fmt.Printf("[DEBUG] Fetched %d bytes from %s\n", len(data), requestURL)
+	
+	// 2. Dump HTML to disk to inspect the raw response
+	if err := os.WriteFile("debug_page.html", data, 0644); err != nil {
+		fmt.Printf("[DEBUG] Failed to write dump: %v\n", err)
 	}
 	
 	var moves []models.Move
 	
-	switch cfg.Game.Slug {
+	switch strings.ToLower(cfg.Game.Slug) {
 	case "bbcf":
 		moves, err = bbcf.BBCFCharPageParser(data)
 		if err != nil {
@@ -58,13 +94,19 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			return err
 		}
 
+	case "uni2":
+		moves, err = mizuumi.Uni2CharDataParser(data)
+		if err != nil {
+			return err
+		}
+
 	default:
-		return fmt.Errorf("no parser available for game: %s", cfg.Game.Name)
+		return fmt.Errorf("no parser available for gameslug '%s' (name: %s)", cfg.Game.Slug, cfg.Game.Name)
 	}
 
 	character := models.Character{
-		Name:	characterName,
-		Slug:	characterSlug,
+		Name:	characterInput,
+		Slug:	targetSlug,
 		URL:	requestURL,
 	}
 
@@ -77,27 +119,7 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	if err != nil {
 		return err
 	}
-
-	for _, move := range moves {
-		rowCount := 0
 	
-		for _, grid := range move.FrameDataGrids {
-			rowCount += len(grid.Rows)
-		}
-	
-	
-		for gridIndex, grid := range move.FrameDataGrids {
-			for rowIndex, row := range grid.Rows {
-				fmt.Printf(
-					"before save: grid=%d row=%d cells=%d\n",
-					gridIndex,
-					rowIndex,
-					len(row.Cells),
-				)
-			}
-		}
-	}
-    
 	if err := sqlite.SaveMoves(cfg.DB, characterID, moves); err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@ import(
         "database/sql"
         "fmt"
 
-        "github.com/Heavyymir/CharData_Aggregator/internal/models"
+        "github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 // Function to retrieve all of a Characters Moves from internal SQL DB
@@ -37,6 +37,7 @@ func GetMoves(db *sql.DB, characterID int64) ([]models.Move, error) {
 			&moveID,
 			&move.Input,
 			&move.Name,
+			&move.Description,
 			); err != nil {
 				return nil, fmt.Errorf("scan move: %w", err)
 			}

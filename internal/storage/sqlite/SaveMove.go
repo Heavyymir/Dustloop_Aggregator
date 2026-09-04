@@ -5,7 +5,7 @@ import(
         "database/sql"
         "fmt"
 
-        "github.com/Heavyymir/CharData_Aggregator/internal/models"
+        "github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 // Function to save a characters moves to the DB
@@ -16,8 +16,27 @@ func SaveMoves(db *sql.DB, characterID int64, moves []models.Move) error {
 	if err != nil {
 		return fmt.Errorf("begin move transaction: %w", err)
 	}
-	
+
+	// Defer Rollback to catch issues with commit if they occur
 	defer tx.Rollback()
+
+	// Delete existing frame data for the selected characters moves
+	_, err = tx.Exec(`
+		DELETE FROM frame_data
+		WHERE move_id IN (SELECT id FROM moves WHERE character_id = ?)
+		`, characterID)
+	if err != nil {
+		return fmt.Errorf("clear existing frame data: %w", err)
+	}
+
+	// Delete existing moves for this character
+	_, err = tx.Exec(`
+		DELETE FROM moves
+		WHERE chracter_id = ?
+		`, characterID)
+	if err != nil {
+		return fmt.Errorf("clear existing moves: %w", err)
+	}
 
 	// Loop over moves slice and call saveMove on each entry
 	for _, move := range moves {
@@ -38,9 +57,9 @@ func saveMove(tx *sql.Tx, characterID int64, move models.Move) (int64, error) {
 
 	// Call .Exec() method on the input SQL transaction to insert data into DB
 	result, err := tx.Exec(`
-	INSERT INTO moves (character_id, input, name)
-	VALUES (?, ?, ?)
-	`, characterID, move.Input, move.Name)
+	INSERT INTO moves (character_id, input, name, description)
+	VALUES (?, ?, ?, ?)
+	`, characterID, move.Input, move.Name, move.Description)
 
 	if err != nil {
 		return 0, fmt.Errorf("save move: %w", err)

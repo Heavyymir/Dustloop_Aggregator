@@ -4,7 +4,7 @@ import(
 	"encoding/json"
 	"os"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/CharDataCache"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/CharDataCache"
 )
 
 func LoadCharCache(path string) (CharDataCache.CharacterCache, error) {

@@ -4,7 +4,7 @@ import(
 	"database/sql"
 	"fmt"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 // Function to list characters present in the SQL database based on a game

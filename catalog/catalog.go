@@ -32,6 +32,7 @@ var Wikis = map[string]Wiki{
 		Name: "Dustloop",
 		URL:  DustloopURL,
 		Slug: "dustloop",
+		SourceType: SourceHTML,
 		Games: map[string]Game{
 			"ggst": {
 				Name:          "Guilty Gear Strive",
@@ -49,6 +50,7 @@ var Wikis = map[string]Wiki{
 		Name:	"Mizuumi",
 		URL:	MizuumiURL,
 		Slug:	"mizuumi",
+		SourceType: SourceHTML,
 		Games:	map[string]Game{
 			"uni2": {
 				Name:			"Under Night IN-BIRTH II Sys:Celes",
@@ -61,6 +63,7 @@ var Wikis = map[string]Wiki{
 		Name:	"FAT (Frame Advantage Tool)",
 		URL:	FATURL,
 		Slug:	"fat",
+		SourceType: SourceJSON,
 		Games: map[string]Game{
 			"sf6": {
 				Name:			"Street Fighter 6",

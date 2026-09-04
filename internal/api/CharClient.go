@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/CharDataCache"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/CharDataCache"
 )
 
 // Temporary Client Struct, will move to internal API package later

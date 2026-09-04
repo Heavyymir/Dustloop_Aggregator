@@ -3,12 +3,16 @@ package sqlite
 import(
 	"database/sql"
 	"fmt"
+	"strings"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 ) 
 
 // Function to insert character data into internal SQL tables
 func SaveCharacter(db *sql.DB, gameSlug string, character models.Character) (int64, error) {
+	normGame := strings.ToLower(gameSlug)
+	normSlug := strings.ToLower(character.Slug)
+
 	// Use db.Exec to insert a character into the Database using the internal Character Struct
 	_, err := db.Exec(`
 		INSERT INTO characters (game, name, slug, source_url)
@@ -17,9 +21,9 @@ func SaveCharacter(db *sql.DB, gameSlug string, character models.Character) (int
 			name = excluded.name,
 			source_url = excluded.source_url
 		`, 
-		gameSlug, 
+		normGame, 
 		character.Name, 
-		character.Slug, 
+		normSlug, 
 		character.URL,
 		)
 

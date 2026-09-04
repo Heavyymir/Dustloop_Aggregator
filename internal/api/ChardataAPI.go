@@ -84,7 +84,7 @@ func (c *Client) FetchHTMLHeadless(url string, timeout time.Duration) ([]byte, e
 	// Configure chrome options for the instance
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		// "Headless" is the flag that hides the UI for the Chromium instance in the function
-		chromedp.Flag("headless", false),
+		chromedp.Flag("headless", true),
 		chromedp.Flag("disable-gpu", true),
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("disable-blink-features", "AutomationControlled"),
@@ -112,42 +112,55 @@ func (c *Client) FetchHTMLHeadless(url string, timeout time.Duration) ([]byte, e
 
 		// Poll/Sleep until Cloudflare passes and the title changes
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			for i := 0; i < 15; i++ {
-				var currentTitle string
-				if err := chromedp.Title(&currentTitle).Do(ctx); err == nil {
-					if currentTitle != "" && currentTitle != "Just a moment..." {
-						return nil
+			ticker := time.NewTicker(500 * time.Millisecond)
+			defer ticker.Stop()
+
+			for {
+				select {
+					case <-ctx.Done():
+						return ctx.Err()
+					case <- ticker.C:
+						var title string
+						_ = chromedp.Title(&title).Do(ctx)
+
+						// Check if request is on a known challenge screen
+						isCloudFlare := strings.Contains(title, "Just a moment")
+						isAnubis := strings.Contains(title, "Making sure you're not a bot")
+
+						if !isCloudFlare && !isAnubis && title != "" {
+							return nil
+						}
 					}
 				}
-				time.Sleep(1 * time.Second)
-			}
-			return nil
-		}),
+			}),
+
+			// Wait for MediaWiki's article container to ensure JavaScript has rendered the table
+			chromedp.WaitVisible("#mw-content-text", chromedp.ByID),
 	
-		// Give dynamic scripts 1 extra second to render tables
-		chromedp.Sleep(1 * time.Second),
+			// Give dynamic scripts 1 extra second to render tables
+			chromedp.Sleep(1 * time.Second),
 	
-		// Capture full rendered HTML
-		chromedp.OuterHTML("html", &htmlContent),
+			// Capture full rendered HTML
+			chromedp.OuterHTML("html", &htmlContent),
 		)
 
-	if err != nil {
-		return nil, fmt.Errorf("chromedp exectution failed for %s: %w", url, err)
+		if err != nil {
+			return nil, fmt.Errorf("chromedp exectution failed for %s: %w", url, err)
+		}
+
+
+		// 5. Verify request didn't capture the challenge page
+		if strings.Contains(htmlContent, "Making sure you're not a bot!") || strings.Contains(htmlContent, "Just a moment...") {
+			return nil, fmt.Errorf("bot challenge was not passed for %s", url)
+		}
+
+		data := []byte(htmlContent)
+		if len(data) == 0 {
+			return nil, fmt.Errorf("empty html returned from headless session for %s", url)
+		}
+
+		// Cache the fetched html
+		c.Cache.Add(url, data)
+
+		return data, nil	
 	}
-
-
-	// 5. Verify request didn't capture the challenge page
-	if strings.Contains(htmlContent, "<title>Just a moment...</title>") {
-		return nil, fmt.Errorf("cloudflare challenge was not passed for %s", url)
-	}
-
-	data := []byte(htmlContent)
-	if len(data) == 0 {
-		return nil, fmt.Errorf("empty html returned from headless session for %s", url)
-	}
-
-	// Cache the fetched html
-	c.Cache.Add(url, data)
-
-	return data, nil	
-}

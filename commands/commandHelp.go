@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/Heavyymir/CharData_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
 )
 
 func commandHelp(cfg *config.Config, args ...string) error {

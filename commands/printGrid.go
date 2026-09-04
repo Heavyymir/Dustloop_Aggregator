@@ -5,7 +5,7 @@ import(
 	"strings"
 	"unicode/utf8"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 

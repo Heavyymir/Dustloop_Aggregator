@@ -18,6 +18,7 @@ func GetCharacterID(db *sql.DB, game, slug string) (int64, error) {
 		game,
 		slug,
 		).Scan(&id)
+		
 		if err != nil {
 			return 0, fmt.Errorf("get character ID: %w", err)
 		}

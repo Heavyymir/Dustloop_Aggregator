@@ -1,6 +1,6 @@
 package ggst
 
-import "github.com/Heavyymir/CharData_Aggregator/internal/models"
+import "github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 
 
 // Define Structs to handle Character data

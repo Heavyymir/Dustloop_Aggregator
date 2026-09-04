@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -57,13 +57,20 @@ func DiscoveredChars(data []byte, gameSlug string) ([]models.Character, error) {
 		}
 
 		// Check found `href` elements for the needed '/w/<game>/' format
+		// If gameSlug is "UNI2" or "uni2", check if the link path contains the game path:
 		prefix := "/w/" + gameSlug + "/"
-		if !strings.HasPrefix(parsed.Path, prefix) {
-			return
+		if strings.ToLower(gameSlug) == "uni2" {
+		    prefix = "/w/Under_Night_In-Birth/UNI2/"
 		}
+		
+		if !strings.HasPrefix(parsed.Path, prefix) {
+		    return
+		}
+		
+		slug := strings.TrimPrefix(parsed.Path, prefix)
 
 		// Find character slugs using the parsed path and prefix
-		slug := strings.TrimPrefix(parsed.Path, prefix)
+		slug = strings.TrimPrefix(parsed.Path, prefix)
 		// Return if Character Slug is empty
 		if slug == "" || strings.Contains(slug, "/") {
 			return

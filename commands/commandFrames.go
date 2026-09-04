@@ -4,23 +4,37 @@ import(
 	"fmt"
 	"strings"
 
-	"github.com/Heavyymir/CharData_Aggregator/config"
-	"github.com/Heavyymir/CharData_Aggregator/internal/storage/sqlite"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
 
 // Cli Command to pull framedata for a character 
 func commandFrames(cfg *config.Config, args ...string) error {
 	// Verify arguments
-	if len(args) != 1 {
-		return fmt.Errorf("usage frames <character_name>")
+	if len(args) < 1 || len(args) > 2 {
+		return fmt.Errorf("usage frames <character_name> [--details]")
 	}
 
-	if cfg.Game.Name == "" {
-			return fmt.Errorf("select a game first")
-		}
+	if cfg.Game.Name == "" || cfg.Wiki.Slug == ""{
+			return fmt.Errorf("select a wiki and game first")
+	}
+	
+	var characterName string
+	showDetails := false
 
-	// Assign Character slug
-	characterSlug := args[0]
+	for _, arg := range args {
+		if arg == "--details" || arg == "-d" {
+			showDetails = true
+		} else if characterName == "" {
+			characterName = arg
+		}
+	}
+
+	if characterName == "" {
+		return fmt.Errorf("please provide a character name")
+	}
+
+	characterSlug := strings.ToLower(strings.ReplaceAll(characterName, " ", "_"))
 
 	// Get character ID from SQL table
 	characterID, err := sqlite.GetCharacterID(
@@ -61,6 +75,12 @@ func commandFrames(cfg *config.Config, args ...string) error {
 			for _, note := range move.Notes {
 				fmt.Printf("  • %s\n", note)
 			}
+			fmt.Println()
+		}
+
+		if showDetails && move.Description != "" {
+			fmt.Println("Description:")
+			fmt.Println(move.Description)
 			fmt.Println()
 		}
 

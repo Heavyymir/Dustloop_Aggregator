@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/Heavyymir/CharData_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
 // helper to print parsed CharData to console in a readable format

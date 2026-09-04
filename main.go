@@ -3,7 +3,7 @@ package main
 import(
 	"log"
 	
-	"github.com/Heavyymir/CharData_Aggregator/internal/storage/sqlite"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
 func main() {
 	// Call to open local sqlite DB to hold data

@@ -3,11 +3,12 @@ package commands
 import (
 	"fmt"
 	"strings"
+	"time"
 
-	"github.com/Heavyymir/CharData_Aggregator/config"
-	"github.com/Heavyymir/CharData_Aggregator/internal/CharDataCache"
-	"github.com/Heavyymir/CharData_Aggregator/internal/discovery"
-	"github.com/Heavyymir/CharData_Aggregator/internal/storage/sqlite"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/CharDataCache"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/discovery"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
 
 // Command to find all available characters for a game and save them to the local SQL DB 
@@ -26,7 +27,17 @@ func commandDiscover(cfg *config.Config, args ...string) error {
 	fmt.Printf("index URL: %s\n", indexURL)
 
 	// Fetch the HTML page using the Index URL
-	data, err := cfg.CharDataClient.Fetch(indexURL)
+	var data []byte
+	var err error
+	
+	switch strings.ToLower(cfg.Wiki.Slug) {
+	case "mizuumi", "supercombo":
+		fmt.Println("Using headless fetch method for roster page...")
+		data, err = cfg.CharDataClient.FetchHTMLHeadless(indexURL, 30 * time.Second)
+	default:
+		data, err = cfg.CharDataClient.Fetch(indexURL)
+	}
+	
 	if err != nil {
 		return err
 	}

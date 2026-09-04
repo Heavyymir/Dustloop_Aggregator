@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Heavyymir/CharData_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
 )
 
 func commandExit(cfg *config.Config, args ...string) error {

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Heavyymir/CharData_Aggregator/catalog"
+	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
 )
 
 // Build the URL to get character HTML data for parsing

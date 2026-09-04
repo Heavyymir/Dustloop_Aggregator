@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Heavyymir/CharData_Aggregator/catalog"
-	"github.com/Heavyymir/CharData_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
 )
 
 // Command to allow users to walk through selections of Wikis, Games and Characters
