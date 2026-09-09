@@ -1,4 +1,4 @@
-package bbcf
+package dustloop
 
 import (
 	"bytes"
@@ -124,19 +124,6 @@ func BBCFCharPageParser(data []byte) ([]models.Move, error) {
 	})
 
 	return moves, nil
-}
-
-// Helper to parse goquery data
-func parseCell(cell *goquery.Selection) models.Cell {
-	toolTip := strings.TrimSpace(cell.Find(".tooltiptext").Text())
-
-	visible := cell.Clone()
-	visible.Find(".tooltiptext").Remove()
-
-	return models.Cell{
-		Value:	strings.TrimSpace(visible.Text()),
-		Tooltip: toolTip,
-	}
 }
 
 

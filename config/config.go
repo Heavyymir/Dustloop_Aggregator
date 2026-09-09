@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/Heavyymir/Dustloop_Aggregator/catalog"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/api"
-	
+	"github.com/chzyer/readline"
 )
 
 type Config struct {
@@ -12,5 +12,7 @@ type Config struct {
 	DB				*sql.DB
 	Wiki           	catalog.Wiki
 	Game           	catalog.Game
+	RL				*readline.Instance
 	CharacterPage  	string
+	DataDir			string
 }

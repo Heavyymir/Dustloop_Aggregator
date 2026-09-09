@@ -16,6 +16,7 @@ func startRepl(db *sql.DB) {
 	cfg := config.Config{
 		CharDataClient: api.NewClient(),
 		DB:             db,
+		DataDir:		"./data",
 	}
 
 	// Initialise the completer to handle tab completion of internal commands

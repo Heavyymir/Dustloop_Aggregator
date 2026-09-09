@@ -1,4 +1,4 @@
-package ggst
+package dustloop
 
 import (
 	"bytes"
@@ -96,16 +96,4 @@ func GGSTCharPageParser(data []byte) ([]models.Move, error) {
 	})
 
 	return moves, nil
-}
-
-func parseCell(cell *goquery.Selection) models.Cell {
-	tooltip := strings.TrimSpace(cell.Find(".tooltiptext").Text())
-
-	visible := cell.Clone()
-	visible.Find(".tooltiptext").Remove()
-
-	return models.Cell{
-		Value:   strings.TrimSpace(visible.Text()),
-		Tooltip: tooltip,
-	}
 }

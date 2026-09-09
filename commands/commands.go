@@ -45,5 +45,10 @@ func GetCommands() map[string]CliCommand {
 			Description: "pulls framedata for a selected character and prints to console",
 			Callback:	 commandFrames,
 		},
+		"set": {
+			Name:		 "set path",
+			Description: "allows user to set preffered json data save location for discover command",
+			Callback:	 CommandSetPath,
+		},
 	}
 }

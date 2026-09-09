@@ -39,10 +39,40 @@ var Wikis = map[string]Wiki{
 				Slug:          "ggst",
 				CharacterPath: "GGST/{character}",
 			},
+			"ggxrd-r2": {
+				Name:			"Guilty Gear Xrd REV 2",
+				Slug:			"ggxrd-r2",
+				CharacterPath:	"GGXRD-R2/{character}",
+			},
+			"ggacr": {
+				Name:			"Guilty Gear Accent Core +R",
+				Slug:			"ggacr",
+				CharacterPath:	"GGACR/{character}",
+			},
 			"bbcf": {
 				Name:          "Blazblue Centralfiction",
 				Slug:          "bbcf",
 				CharacterPath: "BBCF/{character}",
+			},
+			"bbtag": {
+				Name:			"BlazeBlue: Cross Tag Battle",
+				Slug:			"bbtag",
+				CharacterPath:	"BBTAG/{character}",
+			},
+			"gbvsr": {
+				Name:			"Granblue Fantasy Versus: Rising",
+				Slug:			"gbvsr",
+				CharacterPath:	"GBVSR/{character}",
+			},
+			"dbfz": {
+				Name:			"Dragon Ball Fighterz",
+				Slug:			"dbfz",
+				CharacterPath:	"DBFZ/{character}",
+			},
+			"mtfs": {
+				Name:			"Marvel Tokon Fighting Souls",
+				Slug:			"mtfs",
+				CharacterPath:	"MTFS/{character}",
 			},
 		},
 	},

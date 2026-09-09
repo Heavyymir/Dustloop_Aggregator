@@ -9,8 +9,7 @@ import (
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
-	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/bbcf"
-	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/ggst"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/dustloop"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/fat"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/mizuumi"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/discovery"
@@ -84,13 +83,13 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	
 	switch strings.ToLower(cfg.Game.Slug) {
 	case "bbcf":
-		moves, err = bbcf.BBCFCharPageParser(data)
+		moves, err = dustloop.BBCFCharPageParser(data)
 		if err != nil {
 			return err
 		}
 
 	case "ggst":
-		moves, err = ggst.GGSTCharPageParser(data)
+		moves, err = dustloop.GGSTCharPageParser(data)
 		if err != nil {
 			return err
 		}
