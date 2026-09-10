@@ -28,7 +28,7 @@ func ParseLegacyGG(data []byte) ([]models.Move, error) {
 		moveName := strings.TrimSpace(heading.Text())
 
 		// Check for input badge right after the heading or before the attack container
-		inputBadge := container.PrevUntil("div.mw-heading3, div.mw-heading4, h3, h4").Filter("p").Find("input-badge")
+		inputBadge := container.PrevUntil("div.mw-heading3, div.mw-heading4, h3, h4").Filter("p").Find(".input-badge, input-badge")
 		moveInput := strings.TrimSpace(inputBadge.Text())
 		if moveInput == "" {
 			moveInput = moveName  // Specifically for Normals (5P, 6K, JS etc.)

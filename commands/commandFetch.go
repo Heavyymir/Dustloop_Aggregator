@@ -99,6 +99,12 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			return err
 		}
 
+	case "gbvsr":
+		moves, err = dustloop.ParseGBVSR(data)
+		if err != nil {
+			return err
+		}
+
 	case "sf6", "sf5", "usf4":
 		moves, err = fat.FATJSONParser(data)
 		if err != nil {
