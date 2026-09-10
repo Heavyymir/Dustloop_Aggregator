@@ -8,7 +8,12 @@ import (
 // helper to print parsed CharData to console in a readable format
 func printMoveTable(moves []models.Move) {
     for _, move := range moves {
-        fmt.Printf("\n%s %s\n", move.Name, move.Input)
+    	if move.Input != "" && move.Input != move.Name {
+        	fmt.Printf("\n%s %s\n", move.Name, move.Input)
+		} else {
+			fmt.Printf("%s\n", move.Name)
+		}
+        	
         fmt.Println("---------------------------------------------")
 
         for gridIndex, grid := range move.FrameDataGrids {

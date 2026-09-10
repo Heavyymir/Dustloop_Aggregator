@@ -13,7 +13,6 @@ import (
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/fat"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/mizuumi"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/discovery"
-	//"github.com/Heavyymir/CharData_Aggregator/internal/parsers/sf3s"
 )
 
 // Command to Fetch character data once accessing a wiki
@@ -90,6 +89,12 @@ func commandFetch(cfg *config.Config, args ...string) error {
 
 	case "ggst":
 		moves, err = dustloop.GGSTCharPageParser(data)
+		if err != nil {
+			return err
+		}
+
+	case "ggxrd-r2", "ggacr":
+		moves, err = dustloop.ParseLegacyGG(data)
 		if err != nil {
 			return err
 		}

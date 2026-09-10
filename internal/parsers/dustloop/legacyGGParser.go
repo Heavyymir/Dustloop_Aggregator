@@ -1,6 +1,6 @@
 package dustloop
 
-import (
+import(
 	"bytes"
 	"strings"
 
@@ -8,7 +8,8 @@ import (
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 )
 
-func GGSTCharPageParser(data []byte) ([]models.Move, error) {
+// HTML Parser for GGXRD-REV2 Character Pages
+func ParseLegacyGG(data []byte) ([]models.Move, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
@@ -18,31 +19,31 @@ func GGSTCharPageParser(data []byte) ([]models.Move, error) {
 
 	doc.Find(".attack-container").Each(func(_ int, container *goquery.Selection) {
 		move := models.Move{
-			FrameDataGrids: []models.FrameDataGrid{},
-			Notes:          []string{},
+			FrameDataGrids:		[]models.FrameDataGrid{},
+			Notes:				[]string{},
 		}
 
-		// Gather move name
-		heading := container.PrevAll().Filter("div.mw-heading3, h3").First()
-		if heading.Length() > 0 {
-			rawName := heading.Find("h3").Text()
-			if rawName == "" {
-				rawName = heading.Text()
-			}
-			move.Name = strings.Join(strings.Fields(rawName), " ")
+		// Find heading proceeding this attack container
+		heading := container.PrevAll().Filter("div.mw-heading3, div.mw-heading4, h3, h4").First()
+		moveName := strings.TrimSpace(heading.Text())
+
+		// Check for input badge right after the heading or before the attack container
+		inputBadge := container.PrevUntil("div.mw-heading3, div.mw-heading4, h3, h4").Filter("p").Find("input-badge")
+		moveInput := strings.TrimSpace(inputBadge.Text())
+		if moveInput == "" {
+			moveInput = moveName  // Specifically for Normals (5P, 6K, JS etc.)
 		}
 
-		// Gather input notation
-		prevNode := container.Prev()
-		inputBadge := prevNode.Find(".input-badge")
-		if inputBadge.Length() > 0 {
-			move.Input = strings.Join(strings.Fields(inputBadge.Text()), " ")
+		move.Name = moveName
+
+		// Only assign Input if a badge is found and if it is distinct from the name
+		if move.Name != "" && move.Input != moveName{
+			move.Input = moveInput
 		}
 
-		// Extract Grids (handles single-row, multi-row, notes grids)
+		// Extract grids (handles single, multi)
 		container.Find(".frameDataGrid").Each(func(_ int, gridNode *goquery.Selection) {
 			var headers []string
-
 			gridNode.Find(".frameDataGridHeader").First().ChildrenFiltered("div").Each(
 				func(_ int, cell *goquery.Selection) {
 					visible := cell.Clone()
@@ -53,13 +54,14 @@ func GGSTCharPageParser(data []byte) ([]models.Move, error) {
 			)
 
 			grid := models.FrameDataGrid{
-				Headers: headers,
-				Rows:    []models.FrameDataRow{},
+				Headers:	headers,
+				Rows:		[]models.FrameDataRow{},
 			}
 
+			// Extract Frame data rows
 			gridNode.Find(".frameDataGridRow").Each(func(_ int, rowNode *goquery.Selection) {
 				frameRow := models.FrameDataRow{
-					Cells: []models.Cell{},
+					Cells:		[]models.Cell{},
 				}
 
 				rowNode.ChildrenFiltered("div").Each(func(_ int, cellNode *goquery.Selection) {
@@ -68,30 +70,35 @@ func GGSTCharPageParser(data []byte) ([]models.Move, error) {
 
 				grid.Rows = append(grid.Rows, frameRow)
 			})
-
+			
 			move.FrameDataGrids = append(move.FrameDataGrids, grid)
-		})
+		})     
 
-		// Extract Description
+		// Extract move descriptions
 		var paragraphs []string
 		container.Find(".attack-info-body > p").Each(func(_ int, p *goquery.Selection) {
-			text := strings.TrimSpace(p.Text())
+			pClone := p.Clone()
+			pClone.Find("style, script, .tmp, .tooltiptext, .cargo-hover, .mvd-hove, .ext-popups").Remove()
+
+			text := strings.TrimSpace(pClone.Text())
 			if text != "" {
 				paragraphs = append(paragraphs, text)
 			}
 		})
+
 		move.Description = strings.Join(paragraphs, "\n")
 
-		// Extract Notes / Bullet points
+		// Extract Move notes
 		container.Find(".attack-info-body > ul > li").Each(func(_ int, li *goquery.Selection) {
 			text := strings.TrimSpace(li.Text())
-			if text != "" {
+			if text	!= "" {
 				move.Notes = append(move.Notes, text)
 			}
 		})
 
 		moves = append(moves, move)
-	})
 
-	return moves, nil
+		})
+
+		return moves, nil
 }
