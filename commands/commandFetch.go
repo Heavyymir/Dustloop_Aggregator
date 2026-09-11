@@ -50,7 +50,7 @@ func commandFetch(cfg *config.Config, args ...string) error {
 		}
 	}
 
-	// 3. Build the URL using the matched slug
+	// Build the URL using the matched slug
 	pagePath := strings.Replace(cfg.Game.CharacterPath, "{character}", targetSlug, 1)
 	requestURL := fmt.Sprintf("%s/%s", strings.TrimRight(cfg.Wiki.URL, "/"), pagePath)
 
@@ -111,6 +111,12 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			return err
 		}
 
+	case "bbtag":
+		moves, err = dustloop.ParseBBTAG(data)
+		if err != nil {
+			return err
+		}
+
 	case "sf6", "sf5", "usf4":
 		moves, err = fat.FATJSONParser(data)
 		if err != nil {
@@ -148,9 +154,6 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	}
 		
 	printMoveTable(moves)
-
-	// Return request data to the user so they can see it has been successful
-	fmt.Printf("fetched %d bytes from %s\n", len(data), requestURL)
 
 	return nil
 }
