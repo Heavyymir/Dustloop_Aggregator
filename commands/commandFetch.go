@@ -104,6 +104,12 @@ func commandFetch(cfg *config.Config, args ...string) error {
 		if err != nil {
 			return err
 		}
+		
+	case "dbfz":
+		moves, err = dustloop.ParseDBFZ(data)
+		if err != nil {
+			return err
+		}
 
 	case "sf6", "sf5", "usf4":
 		moves, err = fat.FATJSONParser(data)
