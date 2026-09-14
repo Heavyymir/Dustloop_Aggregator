@@ -15,4 +15,5 @@ type Config struct {
 	RL				*readline.Instance
 	CharacterPage  	string
 	DataDir			string
+	DBPath			string	`json:"db_path"`
 }

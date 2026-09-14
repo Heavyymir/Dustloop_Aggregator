@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS frame_data (
 );
 `
 	if _, err := db.Exec(schema); err != nil {
-		return fmt.Errorf("initialised schema: %w", err)
+		return fmt.Errorf("initialise schema: %w", err)
 	}
 	return nil
 }

@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"os"
 
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/dustloop"
-	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/fat"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/mizuumi"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/discovery"
 )
@@ -45,7 +43,7 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	// Fallback if cache wasn't found: Capitalize first letter for MediaWiki
 	if targetSlug == characterInput && len(characterInput) > 0 {
 		switch strings.ToLower(cfg.Wiki.Slug) {
-		case "mizuumi", "supercombo", "dustloop":
+		case "mizuumi", "dustloop":
 			targetSlug = strings.ToUpper(characterInput[:1]) + characterInput[1:]
 		}
 	}
@@ -69,17 +67,11 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	if err != nil {
     	return fmt.Errorf("fetch %s: %w", requestURL, err)
 	}
-
-	// 1. Log the fetched size and URL
-	fmt.Printf("[DEBUG] Fetched %d bytes from %s\n", len(data), requestURL)
 	
-	// 2. Dump HTML to disk to inspect the raw response
-	if err := os.WriteFile("debug_page.html", data, 0644); err != nil {
-		fmt.Printf("[DEBUG] Failed to write dump: %v\n", err)
-	}
 	
 	var moves []models.Move
-	
+
+	// Select game parser based on game slug
 	switch strings.ToLower(cfg.Game.Slug) {
 	case "bbcf":
 		moves, err = dustloop.BBCFCharPageParser(data)
@@ -117,12 +109,12 @@ func commandFetch(cfg *config.Config, args ...string) error {
 			return err
 		}
 
-	case "sf6", "sf5", "usf4":
-		moves, err = fat.FATJSONParser(data)
+	case "mtfs":
+		moves, err = dustloop.ParseMTFS(data)
 		if err != nil {
 			return err
 		}
-
+		
 	case "uni2":
 		moves, err = mizuumi.Uni2CharDataParser(data)
 		if err != nil {

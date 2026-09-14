@@ -28,6 +28,11 @@ func startRepl(db *sql.DB) {
 		readline.PcItem("discover"),
 		readline.PcItem("frames"),
 		readline.PcItem("list"),
+		readline.PcItem("db-info"),
+		readline.PcItem("set",
+			readline.PcItem("path"),
+			readline.PcItem("db"),
+		),
 	)
 
 	// Start the REPL

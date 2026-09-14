@@ -46,9 +46,14 @@ func GetCommands() map[string]CliCommand {
 			Callback:	 commandFrames,
 		},
 		"set": {
-			Name:		 "set path",
-			Description: "allows user to set preffered json data save location for discover command",
-			Callback:	 CommandSetPath,
+			Name:		 "set",
+			Description: "configures settings: set <path|db> <location>",
+			Callback:	 commandSet,
+		},
+		"dbinfo": {
+			Name:	 	 "dbinfo",
+			Description: "displays path to current database to the user",
+			Callback:	 commandDBInfo,		
 		},
 	}
 }

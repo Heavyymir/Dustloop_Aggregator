@@ -2,24 +2,20 @@ package main
 
 import (
 	"log"
-
-	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
+	
+	"github.com/Heavyymir/Dustloop_Aggregator/config"
 )
 
 func main() {
 	// Call to open local sqlite DB to hold data
-	db, err := sqlite.Open("chardata.db")
+	db, cfg, err := config.SetupDatabase()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("initialisation failed: %v", err)
 	}
-
 	defer db.Close()
-
-	// Initialise the require SQL table schema to store scraped data locally
-	if err := sqlite.InitialiseSchema(db); err != nil {
-		log.Fatal(err)
-	}
-
+	
+	log.Printf("Connected to database at: %s", cfg.DBPath)
+	
 	// Call to start CLI loop
 	startRepl(db)
 }
