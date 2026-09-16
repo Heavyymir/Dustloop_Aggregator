@@ -23,11 +23,11 @@ func startRepl(db *sql.DB) {
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("help"),
 		readline.PcItem("select", wikiCompleter()...),
-		readline.PcItem("fetch"),
+		readline.PcItem("fetch", gameCompleters()...),
 		readline.PcItem("exit"),
 		readline.PcItem("discover"),
-		readline.PcItem("frames"),
-		readline.PcItem("list"),
+		readline.PcItem("frames", gameCompleters()...),
+		readline.PcItem("list", gameCompleters()...),
 		readline.PcItem("db-info"),
 		readline.PcItem("set",
 			readline.PcItem("path"),
@@ -36,10 +36,15 @@ func startRepl(db *sql.DB) {
 	)
 
 	// Start the REPL
-	fmt.Println("Welcome to the Character Data Aggregator. Please type 'help' for a list of commands.")
+	fmt.Println("Welcome to the Dustloop Aggregator. Please type 'help' for a list of commands.")
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:       "CharData > ",
-		AutoComplete: completer,
+		Prompt:       "Dustloop Aggregator CLI > ",
+		AutoComplete: &replCompleter{
+			cmdCompleter:	completer,
+			pathCompleter:  &config.PathCompleter{},
+		},
+		HistoryFile:	config.GetHistoryFilePath(),
+		HistoryLimit:	1000,
 	})
 
 	if err != nil {
@@ -111,5 +116,21 @@ func wikiCompleter() []readline.PrefixCompleterInterface {
 		))
 	}
 	// return the completed select command tree
+	return items
+}
+
+func gameCompleters() []readline.PrefixCompleterInterface {
+	var items []readline.PrefixCompleterInterface
+	// Set to avoid duplicates if multiple wikis contain a game key
+	seen := make(map[string]bool)
+
+	for _, wiki := range catalog.Wikis {
+		for gameKey := range wiki.Games {
+			if !seen[gameKey] {
+				seen[gameKey] = true
+				items = append(items, readline.PcItem(gameKey))
+			}
+		}
+	}
 	return items
 }

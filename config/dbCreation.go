@@ -14,7 +14,7 @@ import(
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
 
-type pathCompleter struct{}
+type PathCompleter struct{}
 
 // Get config path returns the path to the config file in a users config directory
 func getConfigPath() (string, error) {
@@ -84,7 +84,7 @@ func PromptNewDBPath(promptMessage string) (string, error) {
 	// Configure readline instance
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:          promptText,
-		AutoComplete:	 &pathCompleter{},
+		AutoComplete:	 &PathCompleter{},
 		InterruptPrompt: "^C",
 		EOFPrompt:       "exit",
 	})
@@ -213,7 +213,7 @@ func SetupDatabase() (*sql.DB, *Config, error) {
 	return db, cfg, nil
 }
 
-func (p *pathCompleter) Do(line []rune, pos int) (newLine [][]rune, length int) {
+func (p *PathCompleter) Do(line []rune, pos int) (newLine [][]rune, length int) {
 	str := string(line[:pos])
 
 	// Determine the directory to look in and the prefix to match

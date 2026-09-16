@@ -5,13 +5,14 @@ import(
 	"strings"
 
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
+	"github.com/Heavyymir/Dustloop_Aggregator/utils"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 )
 
 // Cli Command to pull framedata for a character 
 func commandFrames(cfg *config.Config, args ...string) error {
 	// Verify arguments
-	if len(args) < 1 || len(args) > 2 {
+	if len(args) < 1 {
 		return fmt.Errorf("usage frames <character_name> [--details]")
 	}
 
@@ -19,9 +20,10 @@ func commandFrames(cfg *config.Config, args ...string) error {
 			return fmt.Errorf("select a wiki and game first")
 	}
 	
-	var characterName string
+	var characterName []string
 	showDetails := false
 
+	// Seperate flags for character name words
 	for _, arg := range args {
 		if arg == "--details" || arg == "-d" {
 			showDetails = true
@@ -30,11 +32,12 @@ func commandFrames(cfg *config.Config, args ...string) error {
 		}
 	}
 
-	if characterName == "" {
+	if len(characterName) == 0 {
 		return fmt.Errorf("please provide a character name")
 	}
 
-	characterSlug := strings.ToLower(strings.ReplaceAll(characterName, " ", "_"))
+	rawName := strings.Join(characterName, arg)
+	characterSlug := utils.ToSlug(rawName)
 
 	// Get character ID from SQL table
 	characterID, err := sqlite.GetCharacterID(

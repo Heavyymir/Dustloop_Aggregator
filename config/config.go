@@ -8,12 +8,12 @@ import (
 )
 
 type Config struct {
-	CharDataClient 	*api.Client
-	DB				*sql.DB
-	Wiki           	catalog.Wiki
-	Game           	catalog.Game
-	RL				*readline.Instance
-	CharacterPage  	string
-	DataDir			string
-	DBPath			string	`json:"db_path"`
+	CharDataClient 	*api.Client 		`json:"-"`
+	DB				*sql.DB 			`json:"-"`
+	Wiki           	catalog.Wiki		`json:"-"`
+	Game           	catalog.Game		`json:"-"`
+	RL				*readline.Instance	`json:"-"`
+	CharacterPage  	string				`json:"-"`
+	DataDir			string				`json:"data_dir,omitempty"`
+	DBPath			string				`json:"db_path"`
 }

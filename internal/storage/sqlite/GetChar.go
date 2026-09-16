@@ -16,7 +16,8 @@ func GetCharacter(db *sql.DB, game, slug string) (models.Character, error) {
 	err := db.QueryRow(`
 	SELECT name, slug, source_url
 	FROM characters
-	WHERE game = ? AND slug = ?
+	WHERE LOWER(game) = LOWER(?) 
+		AND (LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?))
 	`, game, slug).Scan(
 		&character.Name,
 		&character.Slug,
