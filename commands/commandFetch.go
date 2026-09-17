@@ -7,6 +7,8 @@ import (
 
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/utils"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/display"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/dustloop"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/parsers/mizuumi"
@@ -21,11 +23,34 @@ func commandFetch(cfg *config.Config, args ...string) error {
 		return fmt.Errorf("select a wiki and game first")
 	}
 
-	if len(args) != 1 {
-		return fmt.Errorf("usage: fetch <character>")
+	// Seperate character names from the verbose flag
+	var charWords []string
+	verbose := false
+	showDetails := false
+	force := false
+
+	for _, arg := range args {
+		trimmed := strings.TrimSpace(arg)
+		switch trimmed {
+		case "-v", "--verbose":
+			verbose = true
+		case "-d", "--details":
+			showDetails = true
+			verbose = true
+		case "-f", "--force":
+			force = true
+		default:
+			if trimmed != "" {
+				charWords = append(charWords, trimmed)
+			}
+		}
+	}
+	
+	if len(charWords) == 0 {
+		return fmt.Errorf("usage: fetch <character> [-v|--verbose] [-d|--details]")
 	}
 
-	characterInput := args[0]
+	characterInput := strings.Join(charWords, " ")
 	targetSlug := characterInput
 
 	// Try loading discovered characters to get the exact casing from saved <wiki>_characters.json
@@ -35,6 +60,7 @@ func commandFetch(cfg *config.Config, args ...string) error {
 		for _, char := range cache.Characters {
 			if strings.EqualFold(char.Name, characterInput) || strings.EqualFold(char.Slug, characterInput) {
 				targetSlug = char.Slug
+				characterInput = char.Name
 				break
 			}
 		}
@@ -42,15 +68,30 @@ func commandFetch(cfg *config.Config, args ...string) error {
 	
 	// Fallback if cache wasn't found: Capitalize first letter for MediaWiki
 	if targetSlug == characterInput && len(characterInput) > 0 {
-		switch strings.ToLower(cfg.Wiki.Slug) {
-		case "mizuumi", "dustloop":
-			targetSlug = strings.ToUpper(characterInput[:1]) + characterInput[1:]
-		}
+		// Convert slug into url-friendly varient
+		targetSlug = utils.FormatWikiSlug(characterInput)
 	}
 
 	// Build the URL using the matched slug
 	pagePath := strings.Replace(cfg.Game.CharacterPath, "{character}", targetSlug, 1)
 	requestURL := fmt.Sprintf("%s/%s", strings.TrimRight(cfg.Wiki.URL, "/"), pagePath)
+
+	// Check if character exists in local SQLite DB
+	existingID, err := sqlite.GetCharacterID(cfg.DB, cfg.Game.Slug, targetSlug)
+	if err == nil && existingID > 0 && !force {
+		msg := fmt.Sprintf("'%s' is already in your database. Refetch and overwrite?", characterInput)
+
+		// Use readline from config. If the answer to the above prompt is no, gracefully end function
+		if !confirmPrompt(cfg.RL, msg) {
+			fmt.Println("Fetch cancelled.")
+			return nil
+		}
+		
+	}
+	
+	spinnerMsg := fmt.Sprintf("Fetching data for %s from %s...", characterInput, cfg.Wiki.Name)
+	sp := display.StartSpinner(spinnerMsg)
+
 
 	var data []byte
 	
@@ -63,6 +104,8 @@ func commandFetch(cfg *config.Config, args ...string) error {
    		// Fast standard HTTP for Dustloop, FAT JSON, etc.
    		data, err = cfg.CharDataClient.Fetch(requestURL)
 	}
+
+	sp.Stop()
 
 	if err != nil {
     	return fmt.Errorf("fetch %s: %w", requestURL, err)
@@ -145,7 +188,53 @@ func commandFetch(cfg *config.Config, args ...string) error {
 		return err
 	}
 		
-	printMoveTable(moves)
+	fmt.Printf("Successfully fetched and saved %d moves for %s!\n", len(moves), characterInput)
+
+	if verbose {
+		for _, move := range moves {
+			var title string
+			name := strings.TrimSpace(move.Name)
+			input := strings.TrimSpace(move.Input)
+
+			if input == "" || strings.EqualFold(input, name) {
+				title = name
+			} else if name == "" {
+				title = input
+			} else {
+				title = fmt.Sprintf("%s (%s)", name, input)
+			}
+			fmt.Printf("\n=== %s ===\n", title)
+
+			for i, grid := range move.FrameDataGrids {
+				if i == 0 {
+					fmt.Println("[Base Frame Data]")
+				} else {
+					fmt.Printf("[Additional Data - Grid %d]\n", i)
+				}
+				display.PrintGrid(grid)
+				fmt.Println()
+			}
+			if showDetails {
+				if len(move.Notes) > 0 {
+					fmt.Println("Notes:")
+					for _, note := range move.Notes {
+						fmt.Printf("  • %s\n", note)
+					}
+					fmt.Println()
+				}
+				if move.Description != "" {
+					fmt.Println("")
+					fmt.Println("Description:")
+					fmt.Println(move.Description)
+					fmt.Println()
+				}
+			}
+			fmt.Println(strings.Repeat("=", 60))
+		}
+	} else {
+		fmt.Printf("Tip: View frame data anytime with 'frames %s'\n", characterInput)
+	}
 
 	return nil
 }
+

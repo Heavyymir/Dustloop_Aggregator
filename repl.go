@@ -7,6 +7,7 @@ import (
 	"github.com/Heavyymir/Dustloop_Aggregator/commands"
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/api"
+	"github.com/Heavyymir/Dustloop_Aggregator/internal/storage/sqlite"
 	"github.com/chzyer/readline"
 	"strings"
 )
@@ -19,14 +20,16 @@ func startRepl(db *sql.DB) {
 		DataDir:		"./data",
 	}
 
+	framesItem := readline.PcItem("frames", getCharacterCompleterItems(cfg.DB, cfg.Game.Slug)...)
+
 	// Initialise the completer to handle tab completion of internal commands
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("help"),
 		readline.PcItem("select", wikiCompleter()...),
 		readline.PcItem("fetch", gameCompleters()...),
+		framesItem,
 		readline.PcItem("exit"),
 		readline.PcItem("discover"),
-		readline.PcItem("frames", gameCompleters()...),
 		readline.PcItem("list", gameCompleters()...),
 		readline.PcItem("db-info"),
 		readline.PcItem("set",
@@ -51,6 +54,8 @@ func startRepl(db *sql.DB) {
 		fmt.Println(err)
 		return
 	}
+
+	cfg.RL = rl
 
 	// Defer close of the initialised REPL loop
 	defer rl.Close()
@@ -81,6 +86,8 @@ func startRepl(db *sql.DB) {
 		if err := command.Callback(&cfg, words[1:]...); err != nil {
 			fmt.Println(err)
 		}
+
+		framesItem.SetChildren(getCharacterCompleterItems(cfg.DB, cfg.Game.Slug))
 	}
 }
 
@@ -131,6 +138,19 @@ func gameCompleters() []readline.PrefixCompleterInterface {
 				items = append(items, readline.PcItem(gameKey))
 			}
 		}
+	}
+	return items
+}
+
+func getCharacterCompleterItems(db *sql.DB, gameSlug string) []readline.PrefixCompleterInterface {
+	names, err := sqlite.GetCharacterNames(db, gameSlug)
+	if err != nil {
+		return nil
+	}
+
+	var items []readline.PrefixCompleterInterface
+	for _, name := range names {
+		items = append(items, readline.PcItem(name))
 	}
 	return items
 }

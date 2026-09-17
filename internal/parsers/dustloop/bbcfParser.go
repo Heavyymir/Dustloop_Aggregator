@@ -2,7 +2,6 @@ package dustloop
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/Heavyymir/Dustloop_Aggregator/internal/models"
@@ -97,16 +96,7 @@ func BBCFCharPageParser(data []byte) ([]models.Move, error) {
 		move.FrameDataGrids = append(move.FrameDataGrids, currentGrid)
 
 		})
-
-		for gi, grid := range move.FrameDataGrids {
-		    for ri, row := range grid.Rows {
-		        for ci, cell := range row.Cells {
-		            fmt.Printf("%s grid=%d row=%d cell=%d: %+v\n",
-		                move.Name, gi, ri, ci, cell)
-		        }
-		    }
-		}
-
+		
 		// Find the full move body, assign to a created paragraphs slice. 
 		container.Find(".attack-info-body > p").Each(func(_ int, paragraph *goquery.Selection) {
 			text := strings.TrimSpace(paragraph.Text())

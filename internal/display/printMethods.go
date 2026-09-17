@@ -1,4 +1,4 @@
-package commands
+package display
 
 import(
 	"fmt"
@@ -9,9 +9,23 @@ import(
 )
 
 
-func printGrid(grid models.FrameDataGrid) {
+func PrintGrid(grid models.FrameDataGrid) {
 	if len(grid.Headers) == 0 {
 		return
+	}
+
+	// Detect columns for colour coding
+	advantageCols := make(map[int]bool)
+	for idx, h := range grid.Headers {
+		norm := strings.ToLower(strings.TrimSpace(h))
+		if strings.Contains(norm, "block") ||
+			strings.Contains(norm, "whiff") ||
+			strings.Contains(norm, "adv") ||
+			norm == "on hit" || 
+			norm == "on-hit" ||
+ 			strings.HasPrefix(norm, "hit adv") {
+			advantageCols[idx] = true
+		}
 	}
 
 	// Calculate the maximum width required for a column
@@ -57,7 +71,13 @@ func printGrid(grid models.FrameDataGrid) {
 	for _, row := range grid.Rows {
 		for i, cell := range row.Cells {
 			if i < len(widths) {
-				fmt.Print(padRight(cell.Value, widths[i]))
+				padded := padRight(cell.Value, widths[i])
+
+				if advantageCols[i] {
+					fmt.Print(colouriseAdvantage(cell.Value) + strings.Repeat(" ", widths[i]-utf8.RuneCountInString(cell.Value)))
+				} else {
+					fmt.Print(padded)
+				}
 			}
 		}
 		fmt.Println()
@@ -73,3 +93,5 @@ func padRight(s string, targetWidth int) string {
 	}
 	return s + strings.Repeat(" ", targetWidth - length)
 }
+
+

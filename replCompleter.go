@@ -2,7 +2,6 @@ package main
 
 import (
 	"strings"
-	"fmt"
 	"github.com/chzyer/readline"
 
 	"github.com/Heavyymir/Dustloop_Aggregator/config"
