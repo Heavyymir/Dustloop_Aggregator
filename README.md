@@ -22,7 +22,7 @@ Data is to be collected from HTML (Wikis ie. Dustloop, Mizummi) and stored in a 
     • help: Displays a list of usable commands.
 	• exit: Exits the program.
 	• select: Allows user to select a wiki and game. Usage: select * | select <wiki> * | select <wiki> <game>.
-	• fetch: Used after select, fetches a character page and saves to SQLite DB. Usage: fetch <character> [-v|verbose] [-d|details] [-f|--force].
+	• fetch: Used after select, fetches a character page and saves to SQLite DB. Usage: fetch <character> [-v|--verbose] [-d|--details] [-f|--force].
 		• [-v|--verbose] Use to print move frame data tables.
 		• [-d|--details] Use to print move frame data tables, description and notes.
 		• [-f|--force] Use to force scraping of character page and ignore character id check in local DB.
