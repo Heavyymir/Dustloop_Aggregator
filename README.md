@@ -39,7 +39,7 @@ Data is to be collected from HTML (Wikis ie. Dustloop, Mizummi) and stored in a 
 # Usage Considerations:
 
 ##Move Notation:
-Wikis currently included in this program use Numpad Notation for move inputs. Numpad notation for a move describes moves as if you were pysically moving through a
+Wikis currently included in this program use Numpad Notation for move inputs. Numpad notation for a move describes moves as if you were physically moving through a
 9 digit numpad on a keyboard, with 5 at the centre (neutral/no motion). Numpad notation assumes you are on the player 1 side (typically left side) of the screen. 
 Examples of numpad notation for understanding (Notation listed as numpad motion + x to represent a button press).
 
@@ -47,12 +47,12 @@ Examples of numpad notation for understanding (Notation listed as numpad motion 
 	• 214x is a quarter circle back.
 	• 623x is a forward, down, downforward motion.
 	• 421x is a back, down, downback motion.
-	• 63214 is a half circle back.
-	• 41236 is a half circle forward.
-	• 632146 is a half circle back to forward.
-	• 360/720/1080 are 1, 2 and 3 full circle inputs respectively.
-	• [4] 6 is a back charge move.
-	• [2] 8 is a down charge move.
+	• 63214x is a half circle back.
+	• 41236x is a half circle forward.
+	• 632146x is a half circle back to forward.
+	• 360/720/1080x are 1, 2 and 3 full circle inputs respectively.
+	• [4] 6x is a back charge move.
+	• [2] 8x is a down charge move.
 	
 There are many input types besides these, and this list is not exhaustive.
 
