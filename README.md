@@ -38,7 +38,8 @@ Data is to be collected from HTML (Wikis ie. Dustloop, Mizummi) and stored in a 
 
 # Usage Considerations:
 
-##Move Notation:
+## Move Notation:
+
 Wikis currently included in this program use Numpad Notation for move inputs. Numpad notation for a move describes moves as if you were physically moving through a
 9 digit numpad on a keyboard, with 5 at the centre (neutral/no motion). Numpad notation assumes you are on the player 1 side (typically left side) of the screen. 
 Examples of numpad notation for understanding (Notation listed as numpad motion + x to represent a button press).
